@@ -7,7 +7,7 @@ export async function GET(req: Request) {
 
   if (!city) return NextResponse.json({ error: 'city is required' }, { status: 400 });
 
-  const key = process.env.OWM_API_KEY!;
+  const key = process.env.WEATHER_API_KEY;
   const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(
     city
   )}&units=metric&lang=${lang}&appid=${key}`;
