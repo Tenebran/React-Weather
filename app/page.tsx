@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { useForecast } from './hooks/useForecast';
 import Image from 'next/image';
 import { useCurrentWeather } from './hooks/useCurrentWeather';
+import { bgByOwm } from './utils/bgByOwm';
+import BackgroundVideo from './components/BackgroundVideo';
 
 export default function ForecastWidget() {
   const { forecast, error, loading, getForecast } = useForecast();
@@ -14,6 +16,8 @@ export default function ForecastWidget() {
     getCurrentWeather('Berlin', 'de');
   }, []);
 
+  const bgSrc = bgByOwm((current as any)?.owmId, (current as any)?.iconCode);
+
   if (loading) return <p>Lädt...</p>;
   if (error) return <p>Fehler: {error}</p>;
 
@@ -21,16 +25,20 @@ export default function ForecastWidget() {
   console.log('current', current);
 
   return (
-    <div>
-      <h2>Vorhersage</h2>
-      <ul>
-        {forecast.map((day) => (
-          <li key={day.day}>
-            <Image src={day.icon} alt={day.day} width={40} height={40} />
-            {day.day}: {day.temp}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <BackgroundVideo src={bgSrc}>
+      <main className="p-6 text-white">
+        {current ? (
+          <>
+            <h1 className="text-3xl">{current.cityName}</h1>
+            <p>{current.description}</p>
+            <p>
+              {current.temp} ( {current.feels_like})
+            </p>
+          </>
+        ) : (
+          <p></p>
+        )}
+      </main>
+    </BackgroundVideo>
   );
 }
