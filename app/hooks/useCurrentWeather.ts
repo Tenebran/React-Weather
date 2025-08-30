@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 
 export type CurrentWeather = {
@@ -7,6 +6,8 @@ export type CurrentWeather = {
   temp: string;
   feels_like: string;
   icon: string;
+  iconCode: string;
+  owmId: number;
   speed: number;
   cityName: string;
   humidity: string;
@@ -16,7 +17,6 @@ export type CurrentWeather = {
 };
 
 const hPaToMmHg = (hPa: number) => (hPa * 0.75006).toFixed(2);
-
 const getWindDirection = (deg: number) => {
   const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW', 'N'];
   return dirs[Math.round(deg / 45)];
@@ -31,15 +31,20 @@ export function useCurrentWeather() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/weather?city=${encodeURIComponent(city)}&lang=${lang}`);
+      const res = await fetch(`/api/weather?city=${encodeURIComponent(city)}&lang=${lang}`, {
+        cache: 'no-store',
+      });
       if (!res.ok) throw new Error(await res.text());
       const json = await res.json();
 
+      const w = json.weather?.[0] ?? {};
       setData({
-        description: json.weather?.[0]?.description ?? '',
+        description: w.description ?? '',
         temp: `${json.main?.temp > 0 ? '+' : ''}${Math.floor(json.main?.temp)}°C`,
         feels_like: `${Math.floor(json.main?.feels_like)}°C`,
-        icon: `https://openweathermap.org/img/wn/${json.weather?.[0]?.icon}@4x.png`,
+        iconCode: w.icon ?? '',
+        owmId: Number(w.id ?? 0),
+        icon: `https://openweathermap.org/img/wn/${w.icon}@4x.png`,
         speed: Math.floor(json.wind?.speed ?? 0),
         cityName: json.name ?? '',
         humidity: `${json.main?.humidity ?? 0}%`,
